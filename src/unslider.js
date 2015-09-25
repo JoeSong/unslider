@@ -6,246 +6,263 @@
  */
 
 (function($, f) {
-	var Unslider = function() {
-		//  Object clone
-		var _ = this;
+  var Unslider = function() {
+    //  Object clone
+    var _ = this;
 
-		//  Set some options
-		_.o = {
-			speed: 500,     // animation speed, false for no transition (integer or boolean)
-			delay: 3000,    // delay between slides, false for no autoplay (integer or boolean)
-			init: 0,        // init delay, false for no delay (integer or boolean)
-			pause: !f,      // pause on hover (boolean)
-			loop: !f,       // infinitely looping (boolean)
-			keys: f,        // keyboard shortcuts (boolean)
-			dots: f,        // display dots pagination (boolean)
-			arrows: f,      // display prev/next arrows (boolean)
-			prev: '&larr;', // text or html inside prev button (string)
-			next: '&rarr;', // same as for prev option
-			fluid: f,       // is it a percentage width? (boolean)
-			starting: f,    // invoke before animation (function with argument)
-			complete: f,    // invoke after animation (function with argument)
-			items: '>ul',   // slides container selector
-			item: '>li',    // slidable items selector
-			easing: 'swing',// easing function to use for animation
-			autoplay: true  // enable autoplay on initialisation
-		};
+    //  Set some options
+    _.o = {
+      speed: 500,     // animation speed, false for no transition (integer or boolean)
+      delay: 3000,    // delay between slides, false for no autoplay (integer or boolean)
+      init: 0,        // init delay, false for no delay (integer or boolean)
+      pause: !f,      // pause on hover (boolean)
+      loop: !f,       // infinitely looping (boolean)
+      keys: f,        // keyboard shortcuts (boolean)
+      dots: f,        // display dots pagination (boolean)
+      arrows: f,      // display prev/next arrows (boolean)
+      prev: '&larr;', // text or html inside prev button (string)
+      next: '&rarr;', // same as for prev option
+      fluid: f,       // is it a percentage width? (boolean)
+      starting: f,    // invoke before animation (function with argument)
+      complete: f,    // invoke after animation (function with argument)
+      items: '>ul',   // slides container selector
+      item: '>li',    // slidable items selector
+      easing: 'swing',// easing function to use for animation
+      autoplay: true  // enable autoplay on initialisation
+    };
 
-		_.init = function(el, o) {
-			//  Check whether we're passing any options in to Unslider
-			_.o = $.extend(_.o, o);
+    _.init = function(el, o) {
+      //  Check whether we're passing any options in to Unslider
+      _.o = $.extend(_.o, o);
 
-			_.el = el;
-			_.ul = el.find(_.o.items);
-			_.max = [el.outerWidth() | 0, el.outerHeight() | 0];
-			_.li = _.ul.find(_.o.item).each(function(index) {
-				var me = $(this),
-					width = me.outerWidth(),
-					height = me.outerHeight();
+      _.el = el;
+      _.ul = el.find(_.o.items);
+      _.max = [el.outerWidth() | 0, el.outerHeight() | 0];
+      _.li = _.ul.find(_.o.item).each(function(index) {
+        var me = $(this),
+          width = me.outerWidth(),
+          height = me.outerHeight();
 
-				//  Set the max values
-				if (width > _.max[0]) _.max[0] = width;
-				if (height > _.max[1]) _.max[1] = height;
-			});
+        //  Set the max values
+        if (width > _.max[0]) _.max[0] = width;
+        if (height > _.max[1]) _.max[1] = height;
+      });
 
 
-			//  Cached vars
-			var o = _.o,
-				ul = _.ul,
-				li = _.li,
-				len = li.length;
+      //  Cached vars
+      var o = _.o,
+        ul = _.ul,
+        li = _.li,
+        len = li.length;
 
-			//  Current indeed
-			_.i = 0;
+      //  Current indeed
+      _.i = 0;
 
-			//  Set the main element
-			el.css({width: _.max[0], height: li.first().outerHeight(), overflow: 'hidden'});
+      //  Set the main element
+      el.css({width: _.max[0], height: li.first().outerHeight(), overflow: 'hidden'});
 
-			//  Set the relative widths
-			ul.css({position: 'relative', left: 0, width: (len * 100) + '%'});
-			if(o.fluid) {
-				li.css({'float': 'left', width: (100 / len) + '%'});
-			} else {
-				li.css({'float': 'left', width: (_.max[0]) + 'px'});
-			}
+      //  Set the relative widths
+      ul.css({position: 'relative', left: 0, width: (len * 100) + '%'});
+      if(o.fluid) {
+        li.css({'float': 'left', width: (100 / len) + '%'});
+      } else {
+        li.css({'float': 'left', width: (_.max[0]) + 'px'});
+      }
 
-			//  Autoslide
-			o.autoplay && setTimeout(function() {
-				if (o.delay | 0) {
-					_.play();
+      if(o.fade == true){
+        li.css({'position': 'absolute','display': 'none'});
+        ul.find("li").eq(0).css({'display':'block'});
+      }
 
-					if (o.pause) {
-						el.on('mouseover mouseout', function(e) {
-							_.stop();
-							e.type === 'mouseout' && _.play();
-						});
-					};
-				};
-			}, o.init | 0);
+      //  Autoslide
+      o.autoplay && setTimeout(function() {
+        if (o.delay | 0) {
+          _.play();
 
-			//  Keypresses
-			if (o.keys) {
-				$(document).keydown(function(e) {
-					switch(e.which) {
-						case 37:
-							_.prev(); // Left
-							break;
-						case 39:
-							_.next(); // Right
-							break;
-						case 27:
-							_.stop(); // Esc
-							break;
-					};
-				});
-			};
+          if (o.pause) {
+            el.on('mouseover mouseout', function(e) {
+              _.stop();
+              e.type === 'mouseout' && _.play();
+            });
+          };
+        };
+      }, o.init | 0);
 
-			//  Dot pagination
-			o.dots && nav('dot');
+      //  Keypresses
+      if (o.keys) {
+        $(document).keydown(function(e) {
+          switch(e.which) {
+            case 37:
+              _.prev(); // Left
+              break;
+            case 39:
+              _.next(); // Right
+              break;
+            case 27:
+              _.stop(); // Esc
+              break;
+          };
+        });
+      };
 
-			//  Arrows support
-			o.arrows && nav('arrow');
+      //  Dot pagination
+      o.dots && nav('dot');
 
-			//  Patch for fluid-width sliders. Screw those guys.
-			o.fluid && $(window).resize(function() {
-				_.r && clearTimeout(_.r);
+      //  Arrows support
+      o.arrows && nav('arrow');
 
-				_.r = setTimeout(function() {
-					var styl = {height: li.eq(_.i).outerHeight()},
-						width = el.outerWidth();
+      //  Patch for fluid-width sliders. Screw those guys.
+      o.fluid && $(window).resize(function() {
+        _.r && clearTimeout(_.r);
 
-					ul.css(styl);
-					styl['width'] = Math.min(Math.round((width / el.parent().width()) * 100), 100) + '%';
-					el.css(styl);
-					li.css({ width: width + 'px' });
-				}, 50);
-			}).resize();
+        _.r = setTimeout(function() {
+          var styl = {height: li.eq(_.i).outerHeight()},
+            width = el.outerWidth();
 
-			//  Move support
-			if ($.event.special['move'] || $.Event('move')) {
-				el.on('movestart', function(e) {
-					if ((e.distX > e.distY && e.distX < -e.distY) || (e.distX < e.distY && e.distX > -e.distY)) {
-						e.preventDefault();
-					}else{
-						el.data("left", _.ul.offset().left / el.width() * 100);
-					}
-				}).on('move', function(e) {
-					var left = 100 * e.distX / el.width();
-				        var leftDelta = 100 * e.deltaX / el.width();
-					_.ul[0].style.left = parseInt(_.ul[0].style.left.replace("%", ""))+leftDelta+"%";
+          ul.css(styl);
+          styl['width'] = Math.min(Math.round((width / el.parent().width()) * 100), 100) + '%';
+          el.css(styl);
+          li.css({ width: width + 'px' });
+        }, 50);
+      }).resize();
 
-					_.ul.data("left", left);
-				}).on('moveend', function(e) {
-					var left = _.ul.data("left");
-					if (Math.abs(left) > 30){
-						var i = left > 0 ? _.i-1 : _.i+1;
-						if (i < 0 || i >= len) i = _.i;
-						_.to(i);
-					}else{
-						_.to(_.i);
-					}
-				});
-			};
+      //  Move support
+      if ($.event.special['move'] || $.Event('move')) {
+        el.on('movestart', function(e) {
+          if ((e.distX > e.distY && e.distX < -e.distY) || (e.distX < e.distY && e.distX > -e.distY)) {
+            e.preventDefault();
+          }else{
+            el.data("left", _.ul.offset().left / el.width() * 100);
+          }
+        }).on('move', function(e) {
+          var left = 100 * e.distX / el.width();
+          var leftDelta = 100 * e.deltaX / el.width();
+          _.ul[0].style.left = parseInt(_.ul[0].style.left.replace("%", ""))+leftDelta+"%";
 
-			return _;
-		};
+          _.ul.data("left", left);
+        }).on('moveend', function(e) {
+          var left = _.ul.data("left");
+          if (Math.abs(left) > 30){
+            var i = left > 0 ? _.i-1 : _.i+1;
+            if (i < 0 || i >= len) i = _.i;
+            _.to(i);
+          }else{
+            _.to(_.i);
+          }
+        });
+      };
 
-		//  Move Unslider to a slide index
-		_.to = function(index, callback) {
-			if (_.t) {
-				_.stop();
-				_.play();
-	                }
-			var o = _.o,
-				el = _.el,
-				ul = _.ul,
-				li = _.li,
-				current = _.i,
-				target = li.eq(index);
+      return _;
+    };
 
-			$.isFunction(o.starting) && !callback && o.starting(el, li.eq(current));
+    //  Move Unslider to a slide index
+    _.to = function(index, callback) {
+      if (_.t) {
+        _.stop();
+        _.play();
+      }
+      var o = _.o,
+        el = _.el,
+        ul = _.ul,
+        li = _.li,
+        current = _.i,
+        target = li.eq(index);
 
-			//  To slide or not to slide
-			if ((!target.length || index < 0) && o.loop === f) return;
+      $.isFunction(o.starting) && !callback && o.starting(el, li.eq(current));
 
-			//  Check if it's out of bounds
-			if (!target.length) index = 0;
-			if (index < 0) index = li.length - 1;
-			target = li.eq(index);
+      //  To slide or not to slide
+      if ((!target.length || index < 0) && o.loop === f) return;
 
-			var speed = callback ? 5 : o.speed | 0,
-				easing = o.easing,
-				obj = {height: target.outerHeight()};
+      //  Check if it's out of bounds
+      if (!target.length) index = 0;
+      if (index < 0) index = li.length - 1;
+      target = li.eq(index);
 
-			if (!ul.queue('fx').length) {
-				//  Handle those pesky dots
-				el.find('.dot').eq(index).addClass('active').siblings().removeClass('active');
+      var speed = callback ? 5 : o.speed | 0,
+        easing = o.easing,
+        obj = {height: target.outerHeight()};
 
-				el.animate(obj, speed, easing) && ul.animate($.extend({left: '-' + index + '00%'}, obj), speed, easing, function(data) {
-					_.i = index;
+      if (!ul.queue('fx').length) {
+        //  Handle those pesky dots
+        el.find('.dot').eq(index).addClass('active').siblings().removeClass('active');
 
-					$.isFunction(o.complete) && !callback && o.complete(el, target);
-				});
-			};
-		};
+        if (o.fade) {
+          _.i = index;
+          ul.find("li:visible").fadeOut(speed);
+          ul.find("li").eq(index).fadeIn(speed);
+        } else {
+          el.animate(obj, speed, easing) && ul.animate($.extend({left: '-' + index + '00%'}, obj), speed, easing, function(data) {
+             _.i = index;
 
-		//  Autoplay functionality
-		_.play = function() {
-			_.t = setInterval(function() {
-				_.to(_.i + 1);
-			}, _.o.delay | 0);
-		};
+            $.isFunction(o.complete) && !callback && o.complete(el, target);
+          });
+        }
 
-		//  Stop autoplay
-		_.stop = function() {
-			_.t = clearInterval(_.t);
-			return _;
-		};
+        //el.animate(obj, speed, easing) && ul.animate($.extend({left: '-' + index + '00%'}, obj), speed, easing, function(data) {
+        //  _.i = index;
+        //
+        //  $.isFunction(o.complete) && !callback && o.complete(el, target);
+        //});
+      };
+    };
 
-		//  Move to previous/next slide
-		_.next = function() {
-			return _.stop().to(_.i + 1);
-		};
+    //  Autoplay functionality
+    _.play = function() {
+      _.t = setInterval(function() {
+        _.to(_.i + 1);
+      }, _.o.delay | 0);
+    };
 
-		_.prev = function() {
-			return _.stop().to(_.i - 1);
-		};
+    //  Stop autoplay
+    _.stop = function() {
+      _.t = clearInterval(_.t);
+      return _;
+    };
 
-		//  Create dots and arrows
-		function nav(name, html) {
-			if (name == 'dot') {
-				html = '<ol class="dots">';
-					$.each(_.li, function(index) {
-						html += '<li class="' + (index === _.i ? name + ' active' : name) + '">' + ++index + '</li>';
-					});
-				html += '</ol>';
-			} else {
-				html = '<div class="';
-				html = html + name + 's">' + html + name + ' prev">' + _.o.prev + '</div>' + html + name + ' next">' + _.o.next + '</div></div>';
-			};
+    //  Move to previous/next slide
+    _.next = function() {
+      return _.stop().to(_.i + 1);
+    };
 
-			_.el.addClass('has-' + name + 's').append(html).find('.' + name).click(function() {
-				var me = $(this);
-				me.hasClass('dot') ? _.stop().to(me.index()) : me.hasClass('prev') ? _.prev() : _.next();
-			});
-		};
-	};
+    _.prev = function() {
+      return _.stop().to(_.i - 1);
+    };
 
-	//  Create a jQuery plugin
-	$.fn.unslider = function(o) {
-		var len = this.length;
+    //  Create dots and arrows
+    function nav(name, html) {
+      if (name == 'dot') {
+        html = '<ol class="dots">';
+        $.each(_.li, function(index) {
+          html += '<li class="' + (index === _.i ? name + ' active' : name) + '">' + ++index + '</li>';
+        });
+        html += '</ol>';
+      } else {
+        html = '<div class="';
+        html = html + name + 's">' + html + name + ' prev">' + _.o.prev + '</div>' + html + name + ' next">' + _.o.next + '</div></div>';
+      };
 
-		//  Enable multiple-slider support
-		return this.each(function(index) {
-			//  Cache a copy of $(this), so it
-			var me = $(this),
-				key = 'unslider' + (len > 1 ? '-' + ++index : ''),
-				instance = (new Unslider).init(me, o);
+      _.el.addClass('has-' + name + 's').append(html).find('.' + name).click(function() {
+        var me = $(this);
+        me.hasClass('dot') ? _.stop().to(me.index()) : me.hasClass('prev') ? _.prev() : _.next();
+      });
+    };
+  };
 
-			//  Invoke an Unslider instance
-			me.data(key, instance).data('key', key);
-		});
-	};
+  //  Create a jQuery plugin
+  $.fn.unslider = function(o) {
+    var len = this.length;
 
-	Unslider.version = "1.0.0";
+    //  Enable multiple-slider support
+    return this.each(function(index) {
+      //  Cache a copy of $(this), so it
+      var me = $(this),
+        key = 'unslider' + (len > 1 ? '-' + ++index : ''),
+        instance = (new Unslider).init(me, o);
+
+      //  Invoke an Unslider instance
+      me.data(key, instance).data('key', key);
+    });
+  };
+
+  Unslider.version = "1.0.0";
 })(jQuery, false);
